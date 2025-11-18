@@ -6,6 +6,7 @@ from io import StringIO
 import zipfile
 from io import BytesIO
 import re
+import tiktoken
 
 st.set_page_config(page_title="Persona JSON Generator", page_icon="📋")
 
