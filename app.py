@@ -133,15 +133,36 @@ if artifact_files:
             # Convert to JSON string
             json_str = json.dumps(persona_json, default=json_serialize, indent=2)
             
-            st.write(f"Debug - JSON string length: {len(json_str):,} characters")
-            
             st.success(f"✓ Generated persona JSON with {len(persona_json)} artifact types!")
             
-            # Show approximate token count (JSON is ~3.5 chars per token due to structure)
+            # Show character count
             char_count = len(json_str)
+            st.write(f"**Character count:** {char_count:,}")
+            
+            # Calculate estimated tokens (approximation method)
             estimated_tokens = int(char_count / 3.5)
-            st.metric(label="Estimated Tokens (approximate)", value=f"{estimated_tokens:,}")
-            st.caption(f"Character count: {char_count:,} | Note: Estimate may vary by ±5-10%")
+            
+            # Calculate exact token count with tiktoken
+            try:
+                encoding = tiktoken.get_encoding("cl100k_base")
+                tokens = encoding.encode(json_str)
+                exact_tokens = len(tokens)
+                
+                # Show both side by side
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric(label="Estimated Tokens (÷3.5)", value=f"{estimated_tokens:,}")
+                with col2:
+                    st.metric(label="Exact Tokens (tiktoken)", value=f"{exact_tokens:,}")
+                
+                # Show difference
+                difference = exact_tokens - estimated_tokens
+                st.caption(f"Difference: {difference:,} tokens ({abs(difference/exact_tokens*100):.1f}%)")
+                
+            except Exception as e:
+                st.error(f"Could not calculate exact tokens: {e}")
+                st.metric(label="Estimated Tokens (÷3.5)", value=f"{estimated_tokens:,}")
+                st.caption("Character count ÷ 3.5 (approximation)")
             
             # Preview
             with st.expander("Preview JSON structure"):
