@@ -121,6 +121,8 @@ if artifact_files:
             
             # Convert to JSON string
             json_str = json.dumps(persona_json, default=json_serialize, indent=2)
+            st.write(f"Debug - JSON string length: {len(json_str):,} characters")
+
             
             st.success(f"✓ Generated persona JSON with {len(persona_json)} artifact types!")
             
