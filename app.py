@@ -2,8 +2,10 @@ import streamlit as st
 import pandas as pd
 import json
 import numpy as np
+from io import StringIO
+import zipfile
+from io import BytesIO
 import re
-import tiktoken
 
 st.set_page_config(page_title="Persona JSON Generator", page_icon="📋")
 
@@ -34,6 +36,15 @@ def clean_dataframe(df):
             df_clean[col] = df_clean[col].map({True: True, False: False, None: None})
     
     return df_clean
+
+def format_phone_number(phone):
+    """Convert phone number to string format"""
+    if pd.isna(phone) or phone is None:
+        return None
+    phone_str = str(phone)
+    if phone_str.endswith('.0'):
+        phone_str = phone_str[:-2]
+    return phone_str
 
 def detect_artifact_type(filename):
     """
@@ -121,19 +132,16 @@ if artifact_files:
             
             # Convert to JSON string
             json_str = json.dumps(persona_json, default=json_serialize, indent=2)
+            
             st.write(f"Debug - JSON string length: {len(json_str):,} characters")
-
             
             st.success(f"✓ Generated persona JSON with {len(persona_json)} artifact types!")
             
-            # Calculate exact token count with tiktoken
-            try:
-                encoding = tiktoken.get_encoding("cl100k_base")
-                tokens = encoding.encode(json_str)
-                total_tokens = len(tokens)
-                st.metric(label="Total Tokens in JSON", value=f"{total_tokens:,}")
-            except Exception as e:
-                st.error(f"Could not calculate tokens: {e}")
+            # Show approximate token count (JSON is ~3.5 chars per token due to structure)
+            char_count = len(json_str)
+            estimated_tokens = int(char_count / 3.5)
+            st.metric(label="Estimated Tokens (approximate)", value=f"{estimated_tokens:,}")
+            st.caption(f"Character count: {char_count:,} | Note: Estimate may vary by ±5-10%")
             
             # Preview
             with st.expander("Preview JSON structure"):
