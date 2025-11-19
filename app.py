@@ -24,9 +24,16 @@ def json_serialize(obj):
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
 def clean_dataframe(df):
-    """Clean DataFrame for JSON compatibility and remove week column"""
+    """Clean DataFrame for JSON compatibility and remove week column and ID columns"""
+    # Remove week column if present
     if 'week' in df.columns:
         df = df.drop('week', axis=1)
+    
+    # Remove all ID columns (ending with _id or named 'id')
+    id_columns = [col for col in df.columns if col.endswith('_id') or col.lower() == 'id']
+    if id_columns:
+        df = df.drop(id_columns, axis=1)
+    
     df_clean = df.replace({np.nan: None})
     
     for col in df_clean.columns:
@@ -119,17 +126,14 @@ if artifact_files:
                 
                 st.write(f"Processing: {file.name} → {artifact_type}")
                 
-                # Read and clean the CSV
+                # Read and convert to compact array
                 artifact_df = pd.read_csv(file)
-                cleaned_df = clean_dataframe(artifact_df)
-                
-                # Convert to list of records
-                persona_json[artifact_type] = cleaned_df.to_dict(orient='records')
+                persona_json[artifact_type] = convert_to_compact_array(artifact_df)
                 
                 st.success(f"✓ Loaded {artifact_type}: {artifact_df.shape[0]} rows, {artifact_df.shape[1]} columns")
             
-            # Convert to JSON string
-            json_str = json.dumps(persona_json, default=json_serialize, indent=2)
+            # Convert to JSON string - NO INDENTATION for compact output
+            json_str = json.dumps(persona_json, default=json_serialize, ensure_ascii=False)
             
             st.success(f"✓ Generated persona JSON with {len(persona_json)} artifact types!")
             
