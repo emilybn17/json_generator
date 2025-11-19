@@ -35,6 +35,15 @@ def clean_dataframe(df):
     
     return df_clean
 
+def convert_to_compact_array(df):
+    """Convert DataFrame to compact array format - removing null values"""
+    df_clean = clean_dataframe(df)
+    # Convert to list of dicts, removing null values from each record
+    return [
+        {k: v for k, v in row.items() if v is not None}
+        for row in df_clean.to_dict(orient='records')
+    ]
+
 def detect_artifact_type(filename):
     """
     Detect artifact type from filename.
