@@ -170,13 +170,35 @@ if artifact_files:
             with st.expander("Preview JSON structure"):
                 st.json({k: f"{len(v)} records" for k, v in persona_json.items()})
             
-            # Download button
-            st.download_button(
-                label="📥 Download Persona JSON",
-                data=json_str,
-                file_name="persona_data.json",
-                mime="application/json"
-            )
+            # Download buttons side by side
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.download_button(
+                    label="📥 Download JSON File",
+                    data=json_str,
+                    file_name="persona_data.json",
+                    mime="application/json",
+                    help="Download as .json file"
+                )
+            
+            with col2:
+                st.download_button(
+                    label="📋 Download as Text (for copy/paste)",
+                    data=json_str,
+                    file_name="persona_data.txt",
+                    mime="text/plain",
+                    help="Download as .txt file with UTF-8 encoding for easy copy/paste into templates"
+                )
+            
+            # Add a text area with the JSON for direct copying
+            with st.expander("📋 Copy JSON directly from here"):
+                st.text_area(
+                    "JSON Content (click to select all, then copy)",
+                    json_str,
+                    height=300,
+                    help="Select all text (Cmd+A / Ctrl+A) and copy (Cmd+C / Ctrl+C)"
+                )
             
             # Add verification info
             try:
@@ -194,7 +216,10 @@ st.markdown("""
 1. Upload all artifact CSV files at once
 2. The app automatically detects the artifact type from the filename
 3. Click 'Generate JSON'
-4. Download your consolidated persona JSON file
+4. Choose your download option:
+   - **Download JSON File**: Standard .json file
+   - **Download as Text**: .txt file with UTF-8 encoding for easy copy/paste
+   - **Copy directly**: Use the expandable text area to copy directly
 
 **Supported artifact types:**
 - Contacts, Calendar, Email, Messages, Notes
