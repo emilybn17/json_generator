@@ -127,7 +127,7 @@ if artifact_files:
                 st.write(f"Processing: {file.name} → {artifact_type}")
                 
                 # Read and convert to compact array
-                artifact_df = pd.read_csv(file)
+                artifact_df = pd.read_csv(file,, dtype=str)
                 persona_json[artifact_type] = convert_to_compact_array(artifact_df)
                 
                 st.success(f"✓ Loaded {artifact_type}: {artifact_df.shape[0]} rows, {artifact_df.shape[1]} columns")
