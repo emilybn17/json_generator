@@ -33,14 +33,16 @@ def clean_dataframe(df):
     id_columns = [col for col in df.columns if col.endswith('_id') or col.lower() == 'id']
     if id_columns:
         df = df.drop(id_columns, axis=1)
-
     
-    # Fix phone numbers and IDs that became floats
+    # Fix phone numbers and similar columns that became floats BEFORE replacing NaN
     for col in df.columns:
-        if 'phone' in col.lower():
-            df[col] = df[col].astype(str).str.replace('.0', '', regex=False)
-
+        if any(x in col.lower() for x in ['phone', 'contact', 'number']):
+            # Convert to string and clean, but only for non-null values
+            df[col] = df[col].apply(
+                lambda x: str(int(x)) if pd.notna(x) and x != '' else None
+            )
     
+    # Now replace any remaining NaN values with None
     df_clean = df.replace({np.nan: None})
     
     for col in df_clean.columns:
