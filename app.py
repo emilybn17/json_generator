@@ -33,6 +33,13 @@ def clean_dataframe(df):
     id_columns = [col for col in df.columns if col.endswith('_id') or col.lower() == 'id']
     if id_columns:
         df = df.drop(id_columns, axis=1)
+
+    
+    # Fix phone numbers and IDs that became floats
+    for col in df.columns:
+        if 'phone' in col.lower():
+            df[col] = df[col].astype(str).str.replace('.0', '', regex=False)
+
     
     df_clean = df.replace({np.nan: None})
     
@@ -127,7 +134,7 @@ if artifact_files:
                 st.write(f"Processing: {file.name} → {artifact_type}")
                 
                 # Read and convert to compact array
-                artifact_df = pd.read_csv(file,, dtype=str)
+                artifact_df = pd.read_csv(file)
                 persona_json[artifact_type] = convert_to_compact_array(artifact_df)
                 
                 st.success(f"✓ Loaded {artifact_type}: {artifact_df.shape[0]} rows, {artifact_df.shape[1]} columns")
