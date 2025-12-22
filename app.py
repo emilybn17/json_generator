@@ -36,10 +36,10 @@ def clean_dataframe(df):
     
     # Fix phone numbers and similar columns that became floats BEFORE replacing NaN
     for col in df.columns:
-        if any(x in col.lower() for x in ['phone', 'contact', 'number']):
-            # Convert to string and clean, but only for non-null values
+        if any(x in col.lower() for x in ['phone']):
+            # Convert to string and clean, preserving formatting like dashes
             df[col] = df[col].apply(
-                lambda x: str(int(x)) if pd.notna(x) and x != '' else None
+                lambda x: str(x).replace('.0', '') if pd.notna(x) and str(x) != 'nan' else None
             )
     
     # Now replace any remaining NaN values with None
